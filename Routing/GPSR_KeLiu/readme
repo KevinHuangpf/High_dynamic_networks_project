@@ -1,0 +1,79 @@
+The GPSR implemenation for NS2 version 2.26 or later
+
+Author: Ke Liu, Computer Science Department, 
+	State University of New York, at Binghamton (SUNY Binghamton)
+October, 2005
+
+This code is under copyleft. You can use it, change it and distribute it 
+as you wish. But no responsibility would be taken by the author of this 
+code. For any publication or product based on this code, you should 
+reference it, even for your course projects if you are using it for any 
+educational purposes.
+
+GPSR code for NS2 version 2.26 or later
+Note: this implementation of GPSR is different from its original 
+      version wich implemented by Brad Karp, Harvard Univ. 1999
+      It is not guaranteed precise implementation of the GPSR design
+
+Files:
+1. To create a directory called "gpsr" in ns2/ns-2.2x/, put all the 
+  below files in it.
+gpsr_packet.h : definition of packets of different type used by this 
+	implementaion
+gpsr_neighbor.h : definition of the neighbor list of each node used by 
+	this gpsr implementation
+	including the planaring procedure (both GG and RNG)
+gpsr_neighbor.cc : the implementation of the neighbor list class
+gpsr.h : the definition of functions of GPSR routing agent of this 
+	implementation
+gpsr.cc : the implementation of the GPSR routing agent
+gpsr_sinklist.h: definition used for scenarios with multiple sinks 
+gpsr_sinklist.cc: implementation of gpsr_sinklist.cc
+gpsr.tcl : the node and agent creation functions used by simultion 
+	configuration in wireless-gpsr.tcl
+wireless-gpsr.tcl : the simulation configuration 
+grid-deploy10x10.tcl : 100 nodes in a 200x200 meter area 
+cbr100.tcl : node 99 sends cbr traffic on UDP to node 0
+
+
+2. The below files should replace the original files of ns2
+packet.h : file in ns2/common 
+  Or you just need to add one more packet type as "PT_GPSR"
+cmu-trace.cc : file in ns2/trace
+  Or you just need to tell the trace "PT_GPSR" is recognized
+priqueue.cc : file in ns2/queue
+  Or you just need to tell the queue "PT_GPSR" should be enqueued
+    through enquenHighpriority the same as PT_DSR, PT_DSDV, etc.
+ns-packet.tcl : file in ns2/tcl/lib, 
+  be careful for this file, you just need to add one more entry in the 
+    foreach prot {} function : GPSR. You don't really need this file to 
+    be replaced if you use another version of ns2 than ns2.26
+
+3. In the Makefile, you need to replace line 
+  $(OBJ_STL)
+  in ns2/ns-2.2x/Makefile as 
+  $(OBJ_STL) \
+  gpsr/gpsr_neighbor.o \
+  gpsr/gpsr_sinklist.o \  
+  gpsr/gpsr.o 
+
+
+Notice: 
+1) check the wireless-gpsr.tcl first and you need to configure:
+   ns2home -- the home directory of your ns2 code directory
+   opt(nn) -- number of nodes
+   opt(start) -- the time your data source starts to publish data
+   opt(stop) -- the time your data source stops to publish data
+
+   Agent/GPSR 
+	planar_type_ -- used for different planarizing algorithm
+			0 for RNG planarize
+			1 for GG planarize
+	hello_period_ -- the period used for hello message periodically
+
+2) after you change or replace all above files in ns2 original ones, please 
+make sure you delete the packet.o file in common directory, and then 
+make the ns2 again (in ns2/ns-2.2x, type make)
+
+For more possibilities for simulation, check the wireless-gpsr.tcl file 
+and the GPSR routing agent implementation code
